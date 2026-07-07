@@ -39,10 +39,11 @@ Il container esegue lo script una sola volta e poi esce, quindi è compatibile c
 ### Decrittografia del backup
 
 ```bash
+KEY_HASH=$(printf '%s' "$ENCRYPTION_KEY" | sha256sum | cut -d' ' -f1)
 openssl enc -d -aes-256-cbc -pbkdf2 \
     -in backup.json.enc \
     -out backup.json \
-    -pass env:ENCRYPTION_KEY
+    -pass pass:"$KEY_HASH"
 ```
 
 Verifica integrità:
@@ -55,5 +56,5 @@ sha256sum -c backup.json.enc.sha256
 
 - La password master viene usata **solo localmente** per sbloccare il vault, mai trasmessa in rete
 - L'autenticazione avviene tramite API key (revocabili e ruotabili indipendentemente)
-- La chiave di crittografia è letta via `-pass env:` e non è visibile nei processi (`ps aux`)
+- La chiave di crittografia viene normalizzata con SHA-256 prima dell'uso, evitando problemi di encoding tra sistemi diversi
 - Il file `.env` con le credenziali **non deve** essere incluso nel controllo versione

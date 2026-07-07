@@ -67,10 +67,11 @@ echo "Backup completato: ${FILENAME}.json"
 if [ -n "$ENCRYPTION_KEY" ]; then
     echo ""
     echo "Crittografia AES-256..."
+    KEY_HASH=$(printf '%s' "$ENCRYPTION_KEY" | sha256sum | cut -d' ' -f1)
     openssl enc -aes-256-cbc -salt -pbkdf2 \
         -in "$OUTPUT_FILE" \
         -out "${OUTPUT_FILE}.enc" \
-        -pass env:ENCRYPTION_KEY
+        -pass pass:"$KEY_HASH"
     openssl dgst -sha256 "${OUTPUT_FILE}.enc" > "${OUTPUT_FILE}.enc.sha256"
     rm -f "$OUTPUT_FILE"
     echo "Backup crittografato: ${FILENAME}.json.enc"

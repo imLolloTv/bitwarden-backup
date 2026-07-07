@@ -2,7 +2,7 @@ services:
   bitwarden-backup:
     build: .
     container_name: bitwarden-backup
-    restart: unless-stopped
+    restart: no
     environment:
       BW_PASSWORD: ${BW_PASSWORD}
       BW_CLIENTID: ${BW_CLIENTID}

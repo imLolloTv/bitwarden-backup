@@ -1,6 +1,6 @@
 # Bitwarden Backup
 
-Container Docker per il backup automatico del vault Bitwarden con crittografia AES-256 e notifiche webhook.
+Backup automatico e sicuro del vault Bitwarden in container Docker, con crittografia AES-256, notifiche webhook e supporto per l'esecuzione tramite n8n.
 
 ## Funzionalità
 
@@ -58,3 +58,7 @@ sha256sum -c backup.json.enc.sha256
 - L'autenticazione avviene tramite API key (revocabili e ruotabili indipendentemente)
 - La chiave di crittografia viene normalizzata con SHA-256 prima dell'uso, evitando problemi di encoding tra sistemi diversi
 - Il file `.env` con le credenziali **non deve** essere incluso nel controllo versione
+
+## Crediti
+
+Progetto sviluppato con il supporto dell'intelligenza artificiale tramite [opencode.ai](https://opencode.ai).

@@ -1,0 +1,19 @@
+services:
+  bitwarden-backup:
+    build: .
+    container_name: bitwarden-backup
+    restart: unless-stopped
+    environment:
+      BW_PASSWORD: ${BW_PASSWORD}
+      BW_CLIENTID: ${BW_CLIENTID}
+      BW_CLIENTSECRET: ${BW_CLIENTSECRET}
+      BW_SERVER: ${BW_SERVER:-https://vault.bitwarden.com}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+    volumes:
+      - data:/backups
+    security_opt:
+      - no-new-privileges:true
+  
+volumes:
+  data:

@@ -1,6 +1,8 @@
 #!/bin/sh
 set -eu
 
+export LANG=C.UTF-8
+
 BW_SERVER="${BW_SERVER:-https://vault.bitwarden.com}"
 WEBHOOK_URL="${WEBHOOK_URL:-}"
 ENCRYPTION_KEY="${ENCRYPTION_KEY:-}"

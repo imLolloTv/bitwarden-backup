@@ -1,5 +1,7 @@
 FROM oven/bun:alpine
 
+ENV LANG=C.UTF-8
+
 WORKDIR /app
 
 # Installa Bitwarden CLI, openssl (crittografia) e curl (webhook)

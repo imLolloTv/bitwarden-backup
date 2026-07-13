@@ -4,10 +4,12 @@ services:
     container_name: bitwarden-backup
     restart: no
     environment:
-      BW_PASSWORD: ${BW_PASSWORD}
       BW_CLIENTID: ${BW_CLIENTID}
       BW_CLIENTSECRET: ${BW_CLIENTSECRET}
       BW_SERVER: ${BW_SERVER:-https://vault.bitwarden.com}
+      BWS_ACCESS_TOKEN: ${BWS_ACCESS_TOKEN}
+      BW_SECRET_ID: ${BW_SECRET_ID}
+      SM_BASE_URL: ${SM_BASE_URL:-}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
       WEBHOOK_URL: ${WEBHOOK_URL:-}
     volumes:

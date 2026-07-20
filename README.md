@@ -46,10 +46,23 @@ openssl enc -d -aes-256-cbc -pbkdf2 \
     -pass pass:"$KEY_HASH"
 ```
 
+```powershell
+# Windows (PowerShell)
+$KEY_HASH = (Get-FileHash -Algorithm SHA256 -InputStream ([System.IO.MemoryStream]::new([System.Text.Encoding]::UTF8.GetBytes($env:ENCRYPTION_KEY)))).Hash.ToLower()
+openssl enc -d -aes-256-cbc -pbkdf2 -in backup.json.enc -out backup.json -pass "pass:$KEY_HASH"
+```
+
 Verifica integrità:
 
 ```bash
 sha256sum -c backup.json.enc.sha256
+```
+
+```powershell
+# Windows (PowerShell)
+$hash = (Get-FileHash -Algorithm SHA256 backup.json.enc).Hash.ToLower()
+$expected = (Get-Content backup.json.enc.sha256).Split(' ')[0]
+if ($hash -eq $expected) { "OK" } else { "FAILED: hash mismatch" }
 ```
 
 ## Sicurezza

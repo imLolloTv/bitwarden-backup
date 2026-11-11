@@ -6,10 +6,17 @@ export LANG=C.UTF-8
 BW_SERVER="${BW_SERVER:-https://vault.bitwarden.com}"
 WEBHOOK_URL="${WEBHOOK_URL:-}"
 ENCRYPTION_KEY="${ENCRYPTION_KEY:-}"
+SM_BASE_URL="${SM_BASE_URL:-}"
 
-: "${BW_PASSWORD:?BW_PASSWORD non impostata}"
 : "${BW_CLIENTID:?BW_CLIENTID non impostata}"
 : "${BW_CLIENTSECRET:?BW_CLIENTSECRET non impostata}"
+: "${BWS_ACCESS_TOKEN:?BWS_ACCESS_TOKEN non impostata}"
+: "${BW_SECRET_ID:?BW_SECRET_ID non impostata}"
+
+# Configura il server per bws (Secrets Manager)
+if [ -n "$SM_BASE_URL" ]; then
+    bws config server-base "$SM_BASE_URL"
+fi
 
 ERROR_LOG=$(mktemp /tmp/backup_error.XXXXXX)
 exec 2>"$ERROR_LOG"
@@ -34,7 +41,7 @@ error_handler() {
 }
 
 trap error_handler ERR
-trap 'bw lock 2>/dev/null || true; bw logout 2>/dev/null || true; rm -f "$ERROR_LOG"' EXIT
+trap 'bw lock 2>/dev/null || true; bw logout 2>/dev/null || true; unset BW_PASSWORD BWS_ACCESS_TOKEN 2>/dev/null || true; rm -f "$ERROR_LOG"' EXIT
 
 echo ""
 echo "Configurazione server..."
@@ -45,8 +52,17 @@ echo "Login con API key..."
 bw login --apikey
 
 echo ""
+echo "Recupero master password da Secret Manager..."
+BW_PASSWORD=$(bws secret get "$BW_SECRET_ID" | jq -r '.value')
+if [ -z "$BW_PASSWORD" ] || [ "$BW_PASSWORD" = "null" ]; then
+    echo "Errore: impossibile recuperare la master password da Secret Manager"
+    exit 1
+fi
+
+echo ""
 echo "Sblocco vault..."
-BW_SESSION=$(bw unlock --passwordenv BW_PASSWORD --raw)
+BW_SESSION=$(echo "$BW_PASSWORD" | bw unlock --raw)
+unset BW_PASSWORD
 export BW_SESSION
 
 echo ""

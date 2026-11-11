@@ -20,6 +20,9 @@ RUN case "${TARGETARCH:-amd64}" in \
     && rm /tmp/bws.zip
 
 COPY backup.sh /app/backup.sh
-RUN chmod +x /app/backup.sh
+
+# Rimuove eventuale BOM e forza terminatori LF (compatibilita Windows/Linux)
+RUN sed -i -e '1s/^\xef\xbb\xbf//' -e 's/\r$//' /app/backup.sh \
+    && chmod +x /app/backup.sh
 
 ENTRYPOINT ["/app/backup.sh"]

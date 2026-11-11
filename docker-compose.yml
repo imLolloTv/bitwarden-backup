@@ -1,21 +1,23 @@
-services:
+﻿services:
   bitwarden-backup:
-    build: .
+    image: ghcr.io/imlollotv/bitwarden-backup:latest
     container_name: bitwarden-backup
     restart: no
     environment:
       BW_CLIENTID: ${BW_CLIENTID}
       BW_CLIENTSECRET: ${BW_CLIENTSECRET}
       BW_SERVER: ${BW_SERVER:-https://vault.bitwarden.com}
-      BWS_ACCESS_TOKEN: ${BWS_ACCESS_TOKEN}
-      BW_SECRET_ID: ${BW_SECRET_ID}
+      USE_SECRET_MANAGER: ${USE_SECRET_MANAGER:-true}
+      BWS_ACCESS_TOKEN: ${BWS_ACCESS_TOKEN:-}
+      BW_SECRET_ID: ${BW_SECRET_ID:-}
       SM_BASE_URL: ${SM_BASE_URL:-}
+      BW_PASSWORD: ${BW_PASSWORD:-}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
       WEBHOOK_URL: ${WEBHOOK_URL:-}
     volumes:
       - data:/backups
     security_opt:
       - no-new-privileges:true
-  
+
 volumes:
   data:

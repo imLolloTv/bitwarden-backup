@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 set -eu
 
 export LANG=C.UTF-8
@@ -7,15 +7,21 @@ BW_SERVER="${BW_SERVER:-https://vault.bitwarden.com}"
 WEBHOOK_URL="${WEBHOOK_URL:-}"
 ENCRYPTION_KEY="${ENCRYPTION_KEY:-}"
 SM_BASE_URL="${SM_BASE_URL:-}"
+USE_SECRET_MANAGER="${USE_SECRET_MANAGER:-true}"
 
 : "${BW_CLIENTID:?BW_CLIENTID non impostata}"
 : "${BW_CLIENTSECRET:?BW_CLIENTSECRET non impostata}"
-: "${BWS_ACCESS_TOKEN:?BWS_ACCESS_TOKEN non impostata}"
-: "${BW_SECRET_ID:?BW_SECRET_ID non impostata}"
 
-# Configura il server per bws (Secrets Manager)
-if [ -n "$SM_BASE_URL" ]; then
-    bws config server-base "$SM_BASE_URL"
+# Verifica credenziali in base alla modalita
+if [ "$USE_SECRET_MANAGER" = "true" ] || [ "$USE_SECRET_MANAGER" = "1" ] || [ "$USE_SECRET_MANAGER" = "yes" ]; then
+    : "${BWS_ACCESS_TOKEN:?BWS_ACCESS_TOKEN non impostata (o imposta USE_SECRET_MANAGER=false)}"
+    : "${BW_SECRET_ID:?BW_SECRET_ID non impostata (o imposta USE_SECRET_MANAGER=false)}"
+
+    if [ -n "$SM_BASE_URL" ]; then
+        bws config server-base "$SM_BASE_URL"
+    fi
+else
+    : "${BW_PASSWORD:?BW_PASSWORD non impostata (o attiva USE_SECRET_MANAGER=true)}"
 fi
 
 ERROR_LOG=$(mktemp /tmp/backup_error.XXXXXX)
@@ -51,12 +57,17 @@ echo ""
 echo "Login con API key..."
 bw login --apikey
 
-echo ""
-echo "Recupero master password da Secret Manager..."
-BW_PASSWORD=$(bws secret get "$BW_SECRET_ID" | jq -r '.value')
-if [ -z "$BW_PASSWORD" ] || [ "$BW_PASSWORD" = "null" ]; then
-    echo "Errore: impossibile recuperare la master password da Secret Manager"
-    exit 1
+if [ "$USE_SECRET_MANAGER" = "true" ] || [ "$USE_SECRET_MANAGER" = "1" ] || [ "$USE_SECRET_MANAGER" = "yes" ]; then
+    echo ""
+    echo "Recupero master password da Secret Manager..."
+    BW_PASSWORD=$(bws secret get "$BW_SECRET_ID" | jq -r '.value')
+    if [ -z "$BW_PASSWORD" ] || [ "$BW_PASSWORD" = "null" ]; then
+        echo "Errore: impossibile recuperare la master password da Secret Manager"
+        exit 1
+    fi
+else
+    echo ""
+    echo "Uso master password da variabile d'ambiente (Secret Manager disattivato)..."
 fi
 
 echo ""
